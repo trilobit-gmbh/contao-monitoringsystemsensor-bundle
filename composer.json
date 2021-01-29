@@ -1,7 +1,7 @@
 {
     "name": "trilobit-gmbh/contao-monitoringsystemsensor-bundle",
     "type": "contao-bundle",
-    "description": "Contao 4 monitoring disk usage sensor bundle",
+    "description": "Contao 4 monitoring sensor bundle",
     "license": "LGPL-3.0-or-later",
     "authors": [
         {
