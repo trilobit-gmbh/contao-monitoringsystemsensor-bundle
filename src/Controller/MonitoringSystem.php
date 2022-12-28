@@ -12,6 +12,7 @@ namespace Trilobit\MonitoringsystemsensorBundle\Controller;
 
 use Contao\Backend;
 use Contao\Config;
+use Contao\CoreBundle\ContaoCoreBundle;
 use Contao\System;
 use Doctrine\DBAL\Connection;
 
@@ -46,7 +47,10 @@ class MonitoringSystem extends Backend
         $phpInfo = $this->getPhpInfo();
         $sqlInfo = $connection->executeQuery('SELECT @@version as version')->fetchAssociative();
 
-        $data['contao.version'] = VERSION.'.'.BUILD;
+        $version = (method_exists(ContaoCoreBundle::class, 'getVersion') ? ContaoCoreBundle::getVersion() : VERSION);
+        $build = (method_exists(ContaoCoreBundle::class, 'getVersion') ? '' : BUILD);
+
+        $data['contao.version'] = $version.'.'.$build;
         $data['contao.maintenance'] = Config::get('maintenanceMode') ? 'true' : 'false';
 
         $data['php.version'] = \PHP_VERSION;
@@ -105,8 +109,11 @@ class MonitoringSystem extends Backend
         $data = [];
         foreach ($sections as $section) {
             $n = substr($section, 0, strpos($section, '</h2>'));
-            preg_match_all('#%S%(?:<td>(.*?)</td>)?(?:<td>(.*?)</td>)?(?:<td>(.*?)</td>)?%E%#', $section, $askapache, \PREG_SET_ORDER);
-            foreach ($askapache as $m) {
+            preg_match_all('#%S%(?:<td>(.*?)</td>)?(?:<td>(.*?)</td>)?(?:<td>(.*?)</td>)?%E%#', $section, $matches, \PREG_SET_ORDER);
+            foreach ($matches as $m) {
+                if (!isset($m[2])) {
+                    continue;
+                }
                 $data[$n][$m[1]] = (!isset($m[3]) || $m[2] === $m[3]) ? $m[2] : \array_slice($m, 2);
             }
         }
